@@ -4,7 +4,7 @@ import type { AnalyzeRequest, AnalyzeResponse } from "./types";
 const getApiBaseUrl = (): string => {
   const stored = localStorage.getItem('API_BASE_URL');
   if (stored) return stored;
-  return process.env.NEXT_PUBLIC_AGENT_API_URL || 'http://localhost:8000';
+  return process.env.NEXT_PUBLIC_AGENT_API_URL || '/ai-devops-api';
 };
 
 export async function analyzeIncident(request: AnalyzeRequest): Promise<AnalyzeResponse> {
