@@ -7,7 +7,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /api
+          - path: /ai-devops-api
             pathType: Prefix
             backend:
               service:
@@ -15,7 +15,7 @@ spec:
                 port:
                   number: 8000
 
-          - path: /
+          - path: /ai-devops
             pathType: Prefix
             backend:
               service:
