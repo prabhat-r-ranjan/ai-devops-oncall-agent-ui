@@ -1,0 +1,28 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-devops-oncall-agent-ui
+  labels:
+    app: ai-devops-oncall-agent-ui
+    component: ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-devops-oncall-agent-ui
+  template:
+    metadata:
+      labels:
+        app: ai-devops-oncall-agent-ui
+        component: ui
+    spec:
+      containers:
+        - name: ai-devops-oncall-agent-ui
+          image: prabhatcr001.azurecr.io/ai-devops-oncall-agent-ui:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"

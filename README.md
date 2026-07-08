@@ -24,3 +24,25 @@ A modern, production-quality Next.js dashboard for AI-assisted DevOps incident t
 ```bash
 git clone <repository-url>
 cd ai-devops-oncall-agent-ui
+
+Github action flow.
+-------------------
+
+git push
+      │
+      ▼
+GitHub Actions
+      │
+      ├── Build Docker image
+      ├── Push to ACR
+      ├── Update ui-deployment.yaml
+      ├── Commit manifest
+      └── Push back to GitHub
+                 │
+                 ▼
+            ArgoCD
+                 │
+          (Auto Sync or Manual Sync)
+                 │
+                 ▼
+               AKS
