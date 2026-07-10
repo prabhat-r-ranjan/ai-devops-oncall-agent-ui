@@ -6,3 +6,4 @@ resources:
   - ui-service.yaml
   - ui-ingress.yaml
   - api-ingress.yaml
+  - api-health-ingress.yaml

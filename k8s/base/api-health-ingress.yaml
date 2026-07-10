@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ai-devops-oncall-agent-api-ingress
+  name: ai-devops-oncall-agent-health-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /analyze
+    nginx.ingress.kubernetes.io/rewrite-target: /health
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /api/analyze
+          - path: /api/health
             pathType: Exact
             backend:
               service:
