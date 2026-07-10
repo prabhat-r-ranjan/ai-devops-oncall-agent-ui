@@ -2,24 +2,21 @@
 kind: Ingress
 metadata:
   name: ai-devops-oncall-agent-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /ai-devops-api(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /ai-devops-api
+            pathType: Prefix
             backend:
               service:
                 name: ai-devops-oncall-agent
                 port:
                   number: 8000
 
-          - path: /ai-devops(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /ai-devops
+            pathType: Prefix
             backend:
               service:
                 name: ai-devops-oncall-agent-ui
