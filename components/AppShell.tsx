@@ -30,7 +30,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
       {/* Main content */}
       <div className="lg:pl-64">
-        <Topbar onMenuClick={() => setSidebarOpen(true)} />
+        {/* <Topbar onMenuClick={() => setSidebarOpen(true)} /> */}
         <main className="p-4 md:p-6 pt-20">
           <div className="max-w-7xl mx-auto">
             {children}
