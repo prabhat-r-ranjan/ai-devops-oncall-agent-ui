@@ -1,3 +1,15 @@
+// Request types
+export interface AnalyzeRequest {
+  incident_id: string;
+  title: string;
+  description: string;
+  severity: string;
+  namespace: string;
+  deployment_name: string;
+  service_name: string;
+}
+
+// Response types
 export interface AnalyzeResponse {
   summary: string;
   primary_issue: string;

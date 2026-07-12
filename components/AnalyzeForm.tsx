@@ -1,159 +1,137 @@
-// components/AnalyzeForm.tsx
 "use client";
 
 import { useState } from "react";
 import type { AnalyzeRequest } from "@/lib/types";
 
 interface AnalyzeFormProps {
-  onSubmit: (data: AnalyzeRequest) => void;
+  onSubmit: (request: AnalyzeRequest) => void;
   loading: boolean;
 }
 
 export default function AnalyzeForm({ onSubmit, loading }: AnalyzeFormProps) {
   const [formData, setFormData] = useState<AnalyzeRequest>({
-    incident_id: "INC-HEALTHY-001",
-    title: "Healthy deployment check",
-    description: "Validate healthy deployment behavior",
-    severity: "LOW",
+    incident_id: "",
+    title: "",
+    description: "",
+    severity: "MEDIUM",
     namespace: "default",
-    deployment_name: "incident-backend",
-    service_name: "incident-backend",
+    deployment_name: "",
+    service_name: "",
   });
-
-  const [errors, setErrors] = useState<Partial<Record<keyof AnalyzeRequest, string>>>({});
-
-  const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof AnalyzeRequest, string>> = {};
-    
-    if (!formData.incident_id.trim()) newErrors.incident_id = 'Incident ID is required';
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (!formData.namespace.trim()) newErrors.namespace = 'Namespace is required';
-    if (!formData.deployment_name.trim()) newErrors.deployment_name = 'Deployment name is required';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
-      onSubmit(formData);
-    }
+    onSubmit(formData);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   return (
     <form onSubmit={handleSubmit} className="glass-card p-6 space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Incident ID <span className="text-red-500">*</span>
-          </label>
+          <label className="block text-sm font-medium mb-1">Incident ID</label>
           <input
             type="text"
+            name="incident_id"
             value={formData.incident_id}
-            onChange={(e) => setFormData({ ...formData, incident_id: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-navy-800 border border-gray-300 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-accent-purple"
-            placeholder="INC-001"
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
+            placeholder="INC-1234"
           />
-          {errors.incident_id && <p className="text-xs text-red-500 mt-1">{errors.incident_id}</p>}
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Severity <span className="text-red-500">*</span>
-          </label>
+          <label className="block text-sm font-medium mb-1">Severity</label>
           <select
+            name="severity"
             value={formData.severity}
-            onChange={(e) => setFormData({ ...formData, severity: e.target.value as AnalyzeRequest['severity'] })}
-            className="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-navy-800 border border-gray-300 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-accent-purple"
+            onChange={handleChange}
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
           >
-            <option value="LOW">LOW</option>
-            <option value="MEDIUM">MEDIUM</option>
-            <option value="HIGH">HIGH</option>
-            <option value="CRITICAL">CRITICAL</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
           </select>
         </div>
+      </div>
 
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-2">
-            Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-navy-800 border border-gray-300 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-accent-purple"
-            placeholder="Brief incident title"
-          />
-          {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
-        </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Title</label>
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          required
+          className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
+          placeholder="Pod crash loop backoff"
+        />
+      </div>
 
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-2">
-            Description <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-navy-800 border border-gray-300 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-accent-purple resize-none"
-            rows={3}
-            placeholder="Detailed incident description"
-          />
-          {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
-        </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Description</label>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          rows={3}
+          className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
+          placeholder="Describe the incident..."
+        />
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Namespace <span className="text-red-500">*</span>
-          </label>
+          <label className="block text-sm font-medium mb-1">Namespace</label>
           <input
             type="text"
+            name="namespace"
             value={formData.namespace}
-            onChange={(e) => setFormData({ ...formData, namespace: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-navy-800 border border-gray-300 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-accent-purple"
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
             placeholder="default"
           />
-          {errors.namespace && <p className="text-xs text-red-500 mt-1">{errors.namespace}</p>}
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Deployment Name <span className="text-red-500">*</span>
-          </label>
+          <label className="block text-sm font-medium mb-1">Deployment Name</label>
           <input
             type="text"
+            name="deployment_name"
             value={formData.deployment_name}
-            onChange={(e) => setFormData({ ...formData, deployment_name: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-navy-800 border border-gray-300 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-accent-purple"
-            placeholder="my-app"
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
+            placeholder="backend"
           />
-          {errors.deployment_name && <p className="text-xs text-red-500 mt-1">{errors.deployment_name}</p>}
         </div>
-
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-2">
-            Service Name (optional)
-          </label>
+        <div>
+          <label className="block text-sm font-medium mb-1">Service Name</label>
           <input
             type="text"
-            value={formData.service_name || ''}
-            onChange={(e) => setFormData({ ...formData, service_name: e.target.value || undefined })}
-            className="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-navy-800 border border-gray-300 dark:border-navy-700 focus:outline-none focus:ring-2 focus:ring-accent-purple"
-            placeholder="my-service"
+            name="service_name"
+            value={formData.service_name}
+            onChange={handleChange}
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
+            placeholder="backend-service"
           />
         </div>
       </div>
 
-      <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-navy-700">
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white font-medium hover:shadow-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Analyzing...' : 'Analyze Incident'}
-        </button>
-      </div>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-3 rounded-lg bg-gradient-to-r from-accent-purple to-accent-blue text-white font-medium hover:shadow-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? "Analyzing..." : "Analyze Incident"}
+      </button>
     </form>
   );
 }
