@@ -18,7 +18,16 @@ import StatusBadge from "./StatusBadge";
 // Map backend status to check if completed
 const isCompleted = (status: string | undefined): boolean => {
   if (!status) return false;
-  const completedStatuses = ['TARGET_FILE_FOUND', 'UPDATED_IN_MEMORY', 'PR_CREATED', 'COMPLETED', 'SUCCESS', 'Unknown'];
+
+  const completedStatuses = [
+    "TARGET_FILE_FOUND",
+    "UPDATED_IN_MEMORY",
+    "PR_CREATED",
+    "COMPLETED",
+    "SUCCESS",
+    "Unknown",
+  ];
+
   return completedStatuses.includes(status);
 };
 
@@ -32,6 +41,7 @@ export default function ResultSummary({
   onReset,
 }: ResultSummaryProps) {
   const isHealthy = result.primary_issue === "HEALTHY";
+  const driftDetected = result.fix_plan?.drift_detected === true;
 
   const hasFixPlan =
     result.fix_plan ||
@@ -40,8 +50,7 @@ export default function ResultSummary({
 
   const confidence = result.confidence;
 
-  // Check if all automation steps completed
-  const allStepsCompleted = 
+  const allStepsCompleted =
     isCompleted(result.repository_analysis?.status) &&
     isCompleted(result.manifest_update?.status) &&
     isCompleted(result.pull_request?.status) &&
@@ -50,50 +59,85 @@ export default function ResultSummary({
   const prNumber = result.pull_request?.pr_number;
   const prUrl = result.pull_request?.pr_url;
 
-  // Get change details from manifest_update
-  const oldValue = result.manifest_update?.old_value || result.manifest_update?.old_image;
-  const newValue = result.manifest_update?.new_value || result.manifest_update?.new_image;
-  const field = result.manifest_update?.field;
-  const changeType = result.fix_plan?.change_type || result.rule_fix_plan?.change_type || 'UPDATE_IMAGE_TAG';
-  const targetFile = result.repository_analysis?.target_file || result.pull_request?.target_file || 'k8s/base/backend-deployment.yaml';
+  const oldValue =
+    result.manifest_update?.old_value ||
+    result.manifest_update?.old_image;
+
+  const newValue =
+    result.manifest_update?.new_value ||
+    result.manifest_update?.new_image;
+
+  const changeType =
+    result.fix_plan?.change_type ||
+    result.rule_fix_plan?.change_type ||
+    "UPDATE_IMAGE_TAG";
+
+  const targetFile =
+    result.repository_analysis?.target_file ||
+    result.pull_request?.target_file ||
+    "k8s/base/backend-deployment.yaml";
+
+  const summaryTitle = isHealthy
+    ? "No Change Required"
+    : driftDetected
+      ? "Runtime Drift Detected"
+      : "Analysis Complete";
+
+  const summaryLabel = isHealthy
+    ? "Healthy"
+    : driftDetected
+      ? "Drift Detected"
+      : "Action Required";
+
+  const summaryText = driftDetected
+    ? result.fix_plan?.reason || result.summary
+    : result.summary;
 
   return (
     <div className="space-y-6">
       {/* Summary Card */}
       <div
-        className={`glass-card p-6 ${
+        className={`glass-card p-6 border-l-4 ${
           isHealthy
-            ? "border-l-4 border-emerald-500"
-            : "border-l-4 border-accent-purple"
+            ? "border-emerald-500"
+            : driftDetected
+              ? "border-amber-500"
+              : "border-accent-purple"
         }`}
       >
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               {isHealthy ? (
                 <CheckCircle className="w-5 h-5 text-emerald-500" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-accent-purple" />
+                <AlertCircle
+                  className={`w-5 h-5 ${
+                    driftDetected
+                      ? "text-amber-500"
+                      : "text-accent-purple"
+                  }`}
+                />
               )}
 
               <h3 className="text-lg font-semibold">
-                {isHealthy
-                  ? "✅ No Change Required"
-                  : "Analysis Complete"}
+                {summaryTitle}
               </h3>
 
               <StatusBadge
-                status={isHealthy ? "healthy" : "active"}
-                label={
+                status={
                   isHealthy
-                    ? "Healthy"
-                    : "Action Required"
+                    ? "healthy"
+                    : driftDetected
+                      ? "warning"
+                      : "active"
                 }
+                label={summaryLabel}
               />
             </div>
 
             <p className="text-muted-foreground">
-              {result.summary}
+              {summaryText}
             </p>
 
             {confidence !== undefined && (
@@ -146,20 +190,22 @@ export default function ResultSummary({
         />
       )}
 
-      {/* Success Message - All steps completed */}
+      {/* Success Message */}
       {allStepsCompleted && prNumber && (
         <div className="glass-card p-6 border-l-4 border-emerald-500">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-full bg-emerald-500/20">
               <CheckCircle className="w-6 h-6 text-emerald-500" />
             </div>
+
             <div>
-              <h3 className="font-semibold">Automation Completed Successfully</h3>
+              <h3 className="font-semibold">
+                Automation Completed Successfully
+              </h3>
+
               <p className="text-sm text-muted-foreground">
-                All automated steps completed and pull request has been created.
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Duration: 00:01:24
+                All automated steps completed and pull request
+                has been created.
               </p>
             </div>
           </div>
@@ -168,6 +214,7 @@ export default function ResultSummary({
 
       {/* Automation Status */}
       <AutomationStatusGrid
+        fixPlan={result.fix_plan}
         repositoryAnalysis={result.repository_analysis}
         manifestUpdate={result.manifest_update}
         pullRequest={result.pull_request}
@@ -177,28 +224,51 @@ export default function ResultSummary({
       {/* PR Details */}
       {prNumber && (
         <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-4">Pull Request Details</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            Pull Request Details
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 rounded-lg bg-gray-100 dark:bg-navy-800/50">
-              <p className="text-sm text-muted-foreground">PR Number</p>
-              <p className="font-semibold">PR #{prNumber}</p>
+              <p className="text-sm text-muted-foreground">
+                PR Number
+              </p>
+              <p className="font-semibold">
+                PR #{prNumber}
+              </p>
             </div>
+
             <div className="p-4 rounded-lg bg-gray-100 dark:bg-navy-800/50">
-              <p className="text-sm text-muted-foreground">Status</p>
-              <p className="font-semibold text-emerald-500">OPEN</p>
+              <p className="text-sm text-muted-foreground">
+                Status
+              </p>
+              <p className="font-semibold text-emerald-500">
+                OPEN
+              </p>
             </div>
+
             <div className="p-4 rounded-lg bg-gray-100 dark:bg-navy-800/50">
-              <p className="text-sm text-muted-foreground">Base Branch</p>
-              <p className="font-mono text-sm">master</p>
+              <p className="text-sm text-muted-foreground">
+                Base Branch
+              </p>
+              <p className="font-mono text-sm">
+                master
+              </p>
             </div>
+
             <div className="p-4 rounded-lg bg-gray-100 dark:bg-navy-800/50">
-              <p className="text-sm text-muted-foreground">Head Branch</p>
-              <p className="font-mono text-sm">{result.pull_request?.branch || 'fix/image-pull-backoff-1752345609'}</p>
+              <p className="text-sm text-muted-foreground">
+                Head Branch
+              </p>
+              <p className="font-mono text-sm">
+                {result.pull_request?.branch}
+              </p>
             </div>
           </div>
+
           {prUrl && (
             <div className="mt-4">
-              <a 
+              <a
                 href={prUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -214,22 +284,39 @@ export default function ResultSummary({
       {/* Changes Summary */}
       {(oldValue || newValue) && (
         <div className="glass-card p-6">
-          <h3 className="text-lg font-semibold mb-4">Changes Summary</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            Changes Summary
+          </h3>
+
           <div className="p-4 rounded-lg bg-gray-100 dark:bg-navy-800/50">
             <div className="flex items-start gap-2">
               <FileCode className="w-4 h-4 text-muted-foreground mt-1" />
+
               <div className="flex-1">
-                <p className="text-sm font-medium">File Modified</p>
+                <p className="text-sm font-medium">
+                  File Modified
+                </p>
+
                 <p className="text-sm font-mono text-muted-foreground">
                   {targetFile}
                 </p>
-                <p className="text-sm font-medium mt-2">Change Type</p>
+
+                <p className="text-sm font-medium mt-2">
+                  Change Type
+                </p>
+
                 <p className="text-sm text-accent-purple">
                   {changeType}
                 </p>
+
                 <div className="mt-2 space-y-1">
-                  <p className="text-sm text-red-500 line-through">{oldValue}</p>
-                  <p className="text-sm text-emerald-500">→ {newValue}</p>
+                  <p className="text-sm text-red-500 line-through break-all">
+                    {oldValue}
+                  </p>
+
+                  <p className="text-sm text-emerald-500 break-all">
+                    → {newValue}
+                  </p>
                 </div>
               </div>
             </div>
