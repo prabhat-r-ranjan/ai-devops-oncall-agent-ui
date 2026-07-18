@@ -10,13 +10,13 @@ interface AnalyzeFormProps {
 
 export default function AnalyzeForm({ onSubmit, loading }: AnalyzeFormProps) {
   const [formData, setFormData] = useState<AnalyzeRequest>({
-    incident_id: "",
-    title: "",
-    description: "",
-    severity: "MEDIUM",
-    namespace: "default",
-    deployment_name: "",
-    service_name: "",
+    incident_id: "DEMO-001",              // ✅ Pre-filled for demo
+    title: "ImagePullBackOff in demo",
+    description: "Pod is unable to pull image nginx:wrong-version",
+    severity: "HIGH",
+    namespace: "demo-incidents",          // ✅ Fixed
+    deployment_name: "demo-imagepull",    // ✅ Fixed
+    service_name: "demo-imagepull",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -97,7 +97,7 @@ export default function AnalyzeForm({ onSubmit, loading }: AnalyzeFormProps) {
             onChange={handleChange}
             required
             className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
-            placeholder="default"
+            placeholder="e.g., demo-incidents"
           />
         </div>
         <div>
@@ -109,7 +109,7 @@ export default function AnalyzeForm({ onSubmit, loading }: AnalyzeFormProps) {
             onChange={handleChange}
             required
             className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-navy-700 bg-white dark:bg-navy-800"
-            placeholder="backend"
+            placeholder="e.g., demo-imagepull"
           />
         </div>
         <div>
