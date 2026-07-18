@@ -72,10 +72,14 @@ export default function ResultSummary({
     result.rule_fix_plan?.change_type ||
     "UPDATE_IMAGE_TAG";
 
+  // ✅ FIXED: Priority order with all sources
   const targetFile =
     result.repository_analysis?.target_file ||
     result.pull_request?.target_file ||
-    "k8s/base/backend-deployment.yaml";
+    result.fix_plan?.target_file ||        // ✅ Added
+    result.rule_fix_plan?.target_file ||   // ✅ Added
+    result.ai_fix_plan?.target_file ||     // ✅ Added
+    "k8s/demo/imagepull.yaml";             // ✅ Changed fallback
 
   const summaryTitle = isHealthy
     ? "No Change Required"
