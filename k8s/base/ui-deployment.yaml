@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: ai-devops-oncall-agent-ui
-          image: prabhatcr001.azurecr.io/ai-devops-oncall-agent-ui:6acbf43f462c939dbc9345866de3173ccdd932ca
+          image: prabhatcr001.azurecr.io/ai-devops-oncall-agent-ui:9188e328791fd745e6007f942f70991f33a7a0ed
           ports:
             - containerPort: 3000
           env:
